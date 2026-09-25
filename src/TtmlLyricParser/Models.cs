@@ -49,7 +49,7 @@ public sealed record LyricLine(string? Id, string? Key, string? Language,
     ImmutableArray<string> SingerIds, ImmutableArray<string> Roles, LyricTiming Timing,
     ImmutableArray<LyricContent> Content, SourceElement Source) : LyricBlock {
     public string Text => LyricTextProjection.GetText(Content);
-    public string ForegroundText => LyricTextProjection.GetText(Content, excludeBackground: true);
+    public string ForegroundVocals => LyricTextProjection.GetText(Content, excludeBackground: true);
     public IEnumerable<LyricSpan> BackgroundVocals => LyricTextProjection.Background(Content);
 }
 

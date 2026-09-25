@@ -16,7 +16,7 @@ if (!result.Success)
 SongLyrics song = result.Lyrics!;
 foreach (var line in song.Lines)
 {
-    Console.WriteLine($"{line.Timing.Begin}: {line.ForegroundText}");
+    Console.WriteLine($"{line.Timing.Begin}: {line.ForegroundVocals}");
     foreach (var background in line.BackgroundVocals)
         Console.WriteLine($"  Background: {background.Text}");
 }
@@ -36,7 +36,7 @@ Schemas are embedded, pinned to the [8 November 2018 W3C Recommendation](https:/
 
 - `SongLyrics` exposes language, titles, songwriters, singers, body sections, lines, variants, and an immutable source tree.
 - Sections retain nested ordering. Lines and spans retain singer IDs, roles, language, timing, source identifiers, and Apple line keys. A singer can be unnamed; IDs are not artist names.
-- Mixed text, nested syllable spans, explicit line breaks, and `xml:space` are preserved in the lyric model. Default XML whitespace is normalized. `Text` includes background vocals; `ForegroundText` excludes spans with the `x-bg` role. No spaces are inserted between adjacent syllables.
+- Mixed text, nested syllable spans, explicit line breaks, and `xml:space` are preserved in the lyric model. Default XML whitespace is normalized. `Text` includes background vocals; `ForegroundVocals` excludes spans with the `x-bg` role. No spaces are inserted between adjacent syllables.
 - Standard TTML timing uses parent-relative coordinates and sequential/parallel containers. Explicit end and duration constraints are intersected with ancestor intervals. Inactive intervals are retained with zero duration. Untimed content starts at its inherited origin and may have a null end.
 - Clock, offset, frames, subframes, ticks, frame-rate multipliers, and continuous SMPTE clock timecodes (nonDrop, dropNTSC, dropPAL) are supported. Decimal arithmetic is converted to `TimeSpan` ticks with midpoint-to-even rounding.
 - The supplied Apple files use song-absolute timestamps and shortened clocks. Auto mode selects `AppleLyrics` when the root has Apple's internal `timing` attribute or Apple iTunes extension attributes occur. Every such parse emits `APPLE_TIMING`. Use `ParserOptions.TimingDialect` to force `Standard` or `AppleLyrics`; the filename does not select timing semantics.

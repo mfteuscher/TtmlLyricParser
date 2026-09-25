@@ -4,10 +4,21 @@
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <PackageId>TtmlLyricParser</PackageId>
+        <Version>0.1.0</Version>
+        <Authors>Michael Teuscher</Authors>
+        <Description>A .NET library for validating TTML2 documents and extracting structured song lyrics, timing, and source data.</Description>
+        <PackageTags>ttml;ttml2;lyrics;subtitle;parser;dfxp;itt</PackageTags>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageProjectUrl>https://github.com/mfteuscher/TtmlLyricParser</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/mfteuscher/TtmlLyricParser</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     </PropertyGroup>
 
     <ItemGroup>
         <EmbeddedResource Include="Schemas/*.xsd" />
+        <None Include="../../README.md" Pack="true" PackagePath="/" />
     </ItemGroup>
 
 </Project>

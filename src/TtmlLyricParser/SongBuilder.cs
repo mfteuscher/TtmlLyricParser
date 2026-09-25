@@ -4,7 +4,7 @@ using System.Xml.Linq;
 
 namespace TtmlLyricParser;
 
-internal sealed class SongBuilder(XElement root, TimingDialect dialect, List<ParseDiagnostic> diagnostics) {
+internal sealed partial class SongBuilder(XElement root, TimingDialect dialect, List<ParseDiagnostic> diagnostics) {
     private TimingResolver timing = null!;
     private readonly Dictionary<XElement, SourceElement> snapshots = [];
     private SourceElement Source(XElement element) {
@@ -26,17 +26,12 @@ internal sealed class SongBuilder(XElement root, TimingDialect dialect, List<Par
         var singers = root.Descendants(XmlNames.Metadata + "agent").Select(e => new Singer(
             (string?)e.Attribute(XNamespace.Xml + "id") ?? "", (string?)e.Attribute("type") ?? "other",
             e.Elements(XmlNames.Metadata + "name").Select(n => n.Value).ToImmutableArray(), Source(e))).ToImmutableArray();
-        var variants = root.Descendants().Where(e => e.Name.Namespace == XmlNames.Apple &&
-                e.Name.LocalName is "translations" or "transliterations")
-            .SelectMany(container => container.Elements().Select(e => new LyricVariant(
-                container.Name.LocalName == "translations" ? LyricVariantKind.Translation : LyricVariantKind.Transliteration,
-                XmlNames.Inherited(e, XNamespace.Xml + "lang"), Source(e)))).ToImmutableArray();
-        if (variants.Length > 0)
-            Warn("UNINTERPRETED_VARIANTS", "Variant payloads are preserved; their text alignment is not yet interpreted.", root);
+        var body = root.Element(XmlNames.Tt + "body") is { } element ? Section(element) : null;
+        var variants = Variants(body);
         return new((string?)root.Attribute(XNamespace.Xml + "lang"),
             root.Element(XmlNames.Tt + "head")?.Descendants(XmlNames.Metadata + "title").Select(e => e.Value).ToImmutableArray() ?? [],
             root.Descendants(XmlNames.Apple + "songwriter").Select(e => e.Value).ToImmutableArray(), singers,
-            root.Element(XmlNames.Tt + "body") is { } body ? Section(body) : null, variants, dialect, Source(root));
+            body, variants, dialect, Source(root));
     }
 
     private LyricSection Section(XElement element) => new(Id(element),
@@ -118,7 +113,7 @@ internal sealed class SongBuilder(XElement root, TimingDialect dialect, List<Par
     private static ImmutableArray<string> Agents(XElement element) => XmlNames.Tokens(XmlNames.Inherited(element, XmlNames.Metadata + "agent"));
     private static ImmutableArray<string> Roles(XElement element) => XmlNames.Tokens(XmlNames.Inherited(element, XmlNames.Metadata + "role"));
 
-    private static Dictionary<XText, string> NormalizeText(XElement line) {
+    private static Dictionary<XText, string> NormalizeText(XElement line, XNamespace? additionalInlineNamespace = null) {
         var values = new Dictionary<XText, StringBuilder>();
         StringBuilder? pendingSpace = null;
         var hasText = false;
@@ -129,7 +124,8 @@ internal sealed class SongBuilder(XElement root, TimingDialect dialect, List<Par
             foreach (var node in element.Nodes()) {
                 if (node is XElement child) {
                     if (child.Name == XmlNames.Tt + "br") { pendingSpace = null; hasText = false; }
-                    else if (child.Name == XmlNames.Tt + "span") Walk(child);
+                    else if (child.Name == XmlNames.Tt + "span" ||
+                        (additionalInlineNamespace is not null && child.Name == additionalInlineNamespace + "span")) Walk(child);
                     continue;
                 }
                 if (node is not XText text) continue;

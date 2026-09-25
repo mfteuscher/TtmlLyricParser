@@ -44,11 +44,27 @@ Schemas are embedded, pinned to the [8 November 2018 W3C Recommendation](https:/
 
 `SourceElement` retains expanded XML names, attributes, text, children, and element line/column locations. Source trees share immutable nodes with projected lyrics. Comments, processing instructions, original prefix spelling, and byte formatting are not retained; this is not a byte-for-byte XML round-trip serializer.
 
+## Translation and transliteration data
+
+`SongLyrics.Variants` exposes Apple internal `translation` and `transliteration` tracks, including inherited `Language`, optional `Type`, and ordered immutable `Entries`. Each `LyricVariantEntry` exposes normalized `Text`, inherited `Language`, `Id` (`xml:id`), `SourceKey` (the unqualified `for` attribute), `Line`, and `Source`.
+
+```csharp
+foreach (var variant in song.Variants)
+    foreach (var entry in variant.Entries)
+        Console.WriteLine($"{entry.Language}: {entry.Text} (source key: {entry.SourceKey})");
+```
+
+Direct Apple internal `text` children are interpreted, including nested Apple internal or TTML `span` elements and TTML `br` elements. Text follows the same whitespace rules as body lyrics and includes background vocals. Inline roles, language overrides, and timing remain available in `Source`; no display behavior or word alignment is synthesized.
+
+`Line` references the existing body line only when `SourceKey` exactly matches one Apple internal line key. There is no fallback to XML IDs, text, language, or position. Missing `for` leaves `Line` null; present but unmatched, empty, or ambiguous keys also emit `UNRESOLVED_VARIANT_REFERENCE`. Track and entry order are source order, not positional associations.
+
+Unsupported entries are retained in `Source` and omitted from `Entries`, with a located `UNINTERPRETED_VARIANTS` warning. Supported siblings remain available. Unstructured text in containers or tracks also warns; empty containers and known empty tracks do not. The format evidence and synthetic fixture provenance are recorded in [variant-fixtures.md](tests/TtmlLyricParser.Tests/variant-fixtures.md).
+
 ## Current limits
 
 | Feature | Behavior |
 | --- | --- |
-| Translation/transliteration payloads | Apple internal containers are exposed as `LyricVariant` payloads with language and source data. Alignment/text projection is not implemented; nonempty payloads emit a warning. All eight provided samples have empty translation containers. Other encodings remain in `Source`. |
+| Translation/transliteration payloads | Documented Apple sidecar text and exact key associations are interpreted as described above. Unknown shapes remain in `Source`. Coverage uses synthetic examples checked against community format documentation; the eight original song fixtures, including Golden, have empty translation containers. Production Apple payload verification remains outstanding. |
 | Styling, regions, ruby, animation, embedded media | Preserved in `Source`; no rendering, computed styling, or media fetching. |
 | Declared TTML/iTT profiles | Preserved; profile conformance is not checked. |
 | Wall-clock and discontinuous SMPTE | Fail explicitly because they require an external time mapping. |
@@ -57,7 +73,7 @@ Schemas are embedded, pinned to the [8 November 2018 W3C Recommendation](https:/
 | Sequential sibling with unresolved duration | Fails explicitly; the parser does not invent a following start time. |
 | Legacy TTML namespace aliases | Rejected; the TTML namespace must be `http://www.w3.org/ns/ttml`. |
 
-Next work: verified translation/transliteration examples and alignment, complete TTML timing edge cases and profile checks, then computed presentation where needed. The parser currently favors explicit diagnostics over silently interpreting unsupported timing.
+Next work: production Apple translation/transliteration examples, complete TTML timing edge cases and profile checks, then computed presentation where needed. The parser currently favors explicit diagnostics over silently interpreting unsupported timing.
 
 ## Tests
 

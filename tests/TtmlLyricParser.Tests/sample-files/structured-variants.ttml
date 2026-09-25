@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Synthetic text using the sidecar structure documented by AMLL; see variant-fixtures.md. -->
+<tt xmlns="http://www.w3.org/ns/ttml" xmlns:i="http://music.apple.com/lyric-ttml-internal" xmlns:ttm="http://www.w3.org/ns/ttml#metadata" xml:lang="en">
+  <head><metadata>
+    <iTunesMetadata xmlns="http://music.apple.com/lyric-ttml-internal">
+      <translations xml:lang="fr">
+        <translation type="subtitle">
+          <text for="second" xml:id="translated"> Bon<span>jour</span> <span ttm:role="x-bg">(écho)</span> </text>
+          <text for="first" xml:lang="es">Hola</text>
+        </translation>
+        <translation xml:lang="de" type="replacement"><text for="first">Hallo</text></translation>
+      </translations>
+      <transliterations><transliteration xml:lang="ja-Latn">
+        <text for="second"><span begin="1s" end="2s">kon</span><span begin="2s" end="3s">nichiwa</span></text>
+      </transliteration></transliterations>
+    </iTunesMetadata>
+  </metadata></head>
+  <body><div><p i:key="first">One</p><div><p i:key="second">Two</p></div></div></body>
+</tt>

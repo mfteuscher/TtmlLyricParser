@@ -62,8 +62,19 @@ public sealed record LyricSection(string? Id, string? Label, LyricTiming Timing,
     });
 }
 
-/// <summary>Uninterpreted variant payload; alignment is not inferred from language or order.</summary>
-public sealed record LyricVariant(LyricVariantKind Kind, string? Language, SourceElement Source);
+/// <summary>A variant track. Entries retain source order, which does not imply line alignment.</summary>
+public sealed record LyricVariant(LyricVariantKind Kind, string? Language, SourceElement Source) {
+    public string? Type { get; init; }
+    public ImmutableArray<LyricVariantEntry> Entries { get; init; } = [];
+}
+
+/// <summary>
+/// Interpreted text with its original identifier and unqualified "for" key.
+/// Line is set only when SourceKey exactly matches one body line's Apple key.
+/// Text includes background vocals; inline attributes and timing remain in Source.
+/// </summary>
+public sealed record LyricVariantEntry(string? Id, string? Language, string Text,
+    string? SourceKey, LyricLine? Line, SourceElement Source);
 
 public sealed record SongLyrics(string? Language, ImmutableArray<string> Titles,
     ImmutableArray<string> Songwriters, ImmutableArray<Singer> Singers, LyricSection? Body,

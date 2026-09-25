@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/TtmlLyricParser/TtmlLyricParser.csproj" />
+  <Project Path="tests/TtmlLyricParser.Tests/TtmlLyricParser.Tests.csproj" />
+</Solution>
